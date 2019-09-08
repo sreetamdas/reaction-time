@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
-// import useTimeout from "use-timeout";
 import "./App.css";
-
-// import { ClickArea } from "./Components";
+// import styled from "styled-components";
+import { ClickArea, Text } from "./StyledComponents";
 
 const App = () => {
 	const [clickState, setClickState] = useState(true);
@@ -11,6 +10,7 @@ const App = () => {
 	const [start, setStart] = useState(false);
 	const [init, setInit] = useState(false);
 	const [ongoing, setOngoing] = useState(false);
+	const [begin, setBegin] = useState(false);
 	// const [text, setText] = useState("Start");
 	const [average, setAverage] = useState(0);
 
@@ -38,15 +38,10 @@ const App = () => {
 
 	useEffect(() => {
 		if (!init) {
-			console.log("init");
-
 			return undefined;
 		}
-		console.log("computing average");
 		const clicks_array = [...clicks];
 		const average = clicks_array.reduce((total, value, index, array) => {
-			console.log({ total }, { value }, { index }, { array });
-
 			total += value;
 			if (index === array.length - 1) {
 				return total / array.length;
@@ -63,6 +58,9 @@ const App = () => {
 		const time_to_react = timestamp - clicks_array.slice(-1)[0];
 
 		clicks_array.pop();
+		if (!clicks_array.length) {
+			setBegin(true);
+		}
 		if (clicks_array.length === 1 && !init) {
 			clicks_array = [];
 			setInit(true);
@@ -76,48 +74,43 @@ const App = () => {
 		// First click from user to start the benchmark
 		if (!start) {
 			setStart(true);
+			setOngoing(true);
 			setClickState(false);
 		}
 		if (!clickState && ongoing) {
 			recordClick(Date.now());
 		}
 
-		// handle ongoing session
+		// handle ongoing session, clicked to start, red now
 		if (!ongoing) {
 			// no color change na?
+			setOngoing(true);
 			setClickState(!clickState);
+			return;
 		}
 
-		setOngoing(!ongoing);
+		setOngoing(false);
 	};
 	useEffect(() => {}, [clicks]);
 	return (
 		<div className="App">
-			<div
-				className="ClickArea"
-				style={{
-					backgroundColor: clickState
-						? !start
-							? "black"
-							: "#ef4b4b"
-						: clicks.length <= 1
-						? "black"
-						: "#47e4bb",
-				}}
+			<ClickArea
 				onClick={e => handleClick(e)}
+				states={[clickState, start, clicks.length]}
+				// background={
+				// 	clickState
+				// 		? !start
+				// 			? "black"
+				// 			: "#ef4b4b"
+				// 		: clicks.length <= 1
+				// 		? "black"
+				// 		: "#47e4bb"
+				// }
 			>
-				{clickState
-					? start
-						? "I'M RED"
-						: "GENESIS"
-					: ongoing
-					? init
-						? "CLICK"
-						: "BOUT TO START"
-					: init
-					? `Your average: ${average}ms`
-					: "HERE WE GO"}
-			</div>
+				<Text
+					states={[clickState, start, ongoing, begin, init, average]}
+				/>
+			</ClickArea>
 		</div>
 	);
 };
