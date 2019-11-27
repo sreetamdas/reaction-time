@@ -8,6 +8,7 @@ export const GlobalStyles = createGlobalStyle`
 	}
 `;
 
+
 export const ClickArea = styled.div`
 	font-family: Anton;
 	font-size: 3em;
